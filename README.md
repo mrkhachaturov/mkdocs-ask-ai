@@ -1,16 +1,94 @@
 # mkdocs-ask-ai
 
-MkDocs plugin that makes your documentation AI-friendly:
+[![PyPI version](https://img.shields.io/pypi/v/mkdocs-ask-ai?color=%2334D058&label=pypi)](https://pypi.org/project/mkdocs-ask-ai/)
+[![Python versions](https://img.shields.io/pypi/pyversions/mkdocs-ask-ai)](https://pypi.org/project/mkdocs-ask-ai/)
+[![Downloads](https://img.shields.io/pypi/dm/mkdocs-ask-ai?color=blue&label=downloads)](https://pypi.org/project/mkdocs-ask-ai/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![MkDocs](https://img.shields.io/badge/mkdocs-%E2%89%A51.4-blue?logo=markdown)](https://www.mkdocs.org)
+[![Material](https://img.shields.io/badge/material-%E2%9C%93-blueviolet?logo=materialdesign)](https://squidfunk.github.io/mkdocs-material/)
+[![MCP](https://img.shields.io/badge/MCP-compatible-orange?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0wIDE4Yy00LjQyIDAtOC0zLjU4LTgtOHMzLjU4LTggOC04IDggMy41OCA4IDgtMy41OCA4LTggOHoiLz48L3N2Zz4=)](https://modelcontextprotocol.io/)
+[![llms.txt](https://img.shields.io/badge/llms.txt-supported-yellow)](https://llmstxt.org/)
 
-- **"Use with AI" dropdown** — Copy markdown, open in ChatGPT/Claude, view raw `.md`
-- **llms.txt / llms-full.txt** — LLM-optimized documentation indexes
-- **Direct markdown serving** — Access source markdown at `.md` URLs
-- **i18n support** — Per-locale output with `mkdocs-static-i18n`
+Make your MkDocs documentation AI-ready. One plugin gives your site everything AI tools need to work with your docs — a "Use with AI" menu for visitors, `llms.txt` for crawlers, an MCP server for agents, and raw markdown URLs for everything else.
+
+Works with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and [mkdocs-static-i18n](https://github.com/ultrabug/mkdocs-static-i18n) out of the box.
+
+![mkdocs-ask-ai — "Use with AI" dropdown on a documentation page](assets/banner.png)
+
+---
+
+## Features
+
+### "Use with AI" Dropdown
+
+A floating button on every page with:
+
+- **Copy page as Markdown** — one-click clipboard copy for any AI tool
+- **View as Markdown** — opens the clean `.md` source in a new tab
+- **Open in ChatGPT** — sends page content directly to ChatGPT via `?q=` parameter
+- **Open in Claude** — sends page content directly to Claude via `?q=` parameter
+- **llms.txt** — link to the full documentation index
+
+Adapts to light and dark themes automatically. Inspired by [1Password's developer docs](https://developer.1password.com).
+
+### llms.txt + llms-full.txt
+
+Follows the [llms.txt standard](https://llmstxt.org/) to make your documentation discoverable by AI systems:
+
+- **`llms.txt`** — structured index with sections, titles, and links to markdown sources
+- **`llms-full.txt`** — complete documentation in a single file for full-context queries
+
+### Direct Markdown Serving
+
+Every page is accessible as clean markdown at its `.md` URL. No HTML parsing needed — AI tools get exactly what they need.
+
+```
+https://your-site.com/getting-started/index.md
+```
+
+### MCP Server
+
+Expose your documentation as an [MCP](https://modelcontextprotocol.io/) server so AI agents can query it programmatically.
+
+**Tools:**
+
+| Tool | Description |
+|------|-------------|
+| `list_pages(locale?)` | Discover available pages grouped by section |
+| `get_page(path, locale?)` | Fetch a specific page as markdown |
+| `search_docs(query, locale?)` | Full-text search with snippets |
+| `get_full_docs(locale?)` | Get the entire documentation as one text |
+
+**Transports:**
+
+| Use case | Transport | Example |
+|----------|-----------|---------|
+| Local / private | stdio | Add to Claude Desktop, Cursor, Windsurf |
+| Public website | Streamable HTTP | `https://your-site.com/mcp` |
+
+Every page is also registered as an MCP resource (`docs://site-name/path/to/page.md`).
+
+### i18n Support
+
+Full support for multilingual sites via `mkdocs-static-i18n`. Each locale gets its own:
+
+- `llms.txt` and `llms-full.txt`
+- Markdown files at locale-prefixed URLs
+- MCP server tools with `locale` parameter
+- `docs-index.json` with all locales merged
+
+---
 
 ## Installation
 
 ```bash
 pip install mkdocs-ask-ai
+```
+
+With MCP server support:
+
+```bash
+pip install mkdocs-ask-ai[mcp]
 ```
 
 ## Quick Start
@@ -23,18 +101,94 @@ plugins:
       sections:
         "Getting Started":
           - index.md: "Introduction"
-          - quickstart.md
+          - quickstart.md: "Quick start guide"
         "API Reference":
           - api/*.md
 ```
 
-Every page gets a "Use with AI" button with:
+That's it. Your site now has:
 
-- **Copy page as Markdown** — clipboard copy for any AI tool
-- **View as Markdown** — opens `.md` source in a new tab
-- **Open in ChatGPT** — sends page content directly to ChatGPT
-- **Open in Claude** — sends page content directly to Claude
-- **llms.txt** — link to the full documentation index
+- `llms.txt` and `llms-full.txt` at the site root
+- `.md` URLs for every page
+- "Use with AI" dropdown on every page
+
+## Configuration
+
+### Basic Options
+
+```yaml
+plugins:
+  - ask-ai:
+      sections: {}                      # Section names mapped to file patterns (glob supported)
+      markdown_description: ""          # Description included in llms.txt header
+      enable_ai_menu: true              # Show "Use with AI" dropdown
+      ai_menu_button_text: "Use with AI"
+      enable_chatgpt: true              # Show "Open in ChatGPT" item
+      enable_claude: true               # Show "Open in Claude" item
+      enable_markdown_urls: true        # Serve .md files alongside HTML
+      enable_llms_txt: true             # Generate llms.txt
+      enable_llms_full: true            # Generate llms-full.txt
+```
+
+### MCP Server Options
+
+```yaml
+plugins:
+  - ask-ai:
+      enable_mcp: true                  # Generate docs-index.json for MCP
+      mcp_transport: "stdio"            # "stdio" or "streamable-http"
+      mcp_path: "/mcp"                  # URL path for streamable HTTP
+      mcp_port: 8808                    # Port for standalone HTTP server
+```
+
+### Section Patterns
+
+Sections support explicit paths, descriptions, and glob patterns:
+
+```yaml
+sections:
+  "Infrastructure":
+    - infrastructure/index.md: "Infrastructure overview"
+    - infrastructure/proxmox.md: "Proxmox hypervisor"
+    - infrastructure/*.md              # glob — include all .md files
+  "API":
+    - api/*.md
+```
+
+## Using the MCP Server
+
+### With Claude Desktop / Cursor
+
+Build your site first, then add to your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "my-docs": {
+      "command": "mkdocs-ask-ai",
+      "args": ["mcp", "--site-dir", "/path/to/public"]
+    }
+  }
+}
+```
+
+### Standalone HTTP Server
+
+```bash
+mkdocs-ask-ai mcp --transport http --port 8808 --site-dir ./public
+```
+
+### CLI Reference
+
+```bash
+mkdocs-ask-ai mcp [OPTIONS]
+
+Options:
+  --site-dir PATH          Built site directory (default: ./public)
+  --transport {stdio,http} Transport type (default: stdio)
+  --port PORT              HTTP port (default: 8808)
+  --host HOST              HTTP host (default: 127.0.0.1)
+```
 
 ## With mkdocs-static-i18n
 
@@ -53,26 +207,20 @@ plugins:
           default: true
           name: English
         - locale: ru
-          name: Русский
+          name: Russian
 ```
 
-Generates separate outputs per locale:
-- `site/llms.txt` + `site/llms-full.txt` (default locale)
-- `site/ru/llms.txt` + `site/ru/llms-full.txt` (additional locales)
+Output per locale:
 
-## Configuration
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `sections` | `{}` | Section names mapped to file patterns |
-| `enable_ai_menu` | `true` | Show "Use with AI" dropdown on pages |
-| `ai_menu_button_text` | `"Use with AI"` | Dropdown trigger text |
-| `enable_chatgpt` | `true` | Show "Open in ChatGPT" item |
-| `enable_claude` | `true` | Show "Open in Claude" item |
-| `enable_markdown_urls` | `true` | Serve `.md` files alongside HTML |
-| `enable_llms_txt` | `true` | Generate `llms.txt` |
-| `enable_llms_full` | `true` | Generate `llms-full.txt` |
-| `markdown_description` | — | Description included in `llms.txt` |
+```
+public/
+  llms.txt              # English
+  llms-full.txt
+  docs-index.json       # merged index (all locales)
+  ru/
+    llms.txt            # Russian
+    llms-full.txt
+```
 
 ## License
 

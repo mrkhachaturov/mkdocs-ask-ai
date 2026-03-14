@@ -6,11 +6,11 @@ and the MCP server.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 
 def build_index(
-    pages_data: Dict[str, List[Dict[str, Any]]],
+    pages_data: dict[str, list[dict[str, Any]]],
     site_name: str,
     site_url: str,
     default_locale: str,
@@ -26,12 +26,18 @@ def build_index(
             if "title" not in page or "dest_path" not in page:
                 continue
             dest_path = page["dest_path"]
-            md_path = dest_path.replace(".html", ".md") if dest_path.endswith(".html") else dest_path
-            section_pages.append({
-                "title": page["title"],
-                "path": md_path,
-                "description": page.get("description", ""),
-            })
+            md_path = (
+                dest_path.replace(".html", ".md")
+                if dest_path.endswith(".html")
+                else dest_path
+            )
+            section_pages.append(
+                {
+                    "title": page["title"],
+                    "path": md_path,
+                    "description": page.get("description", ""),
+                }
+            )
         if section_pages:
             sections[section_name] = section_pages
 
@@ -39,9 +45,7 @@ def build_index(
         "site_name": site_name,
         "site_url": site_url.rstrip("/"),
         "default_locale": default_locale,
-        "locales": {
-            locale: {"sections": sections}
-        },
+        "locales": {locale: {"sections": sections}},
     }
 
 
@@ -54,7 +58,9 @@ def save_index(index: dict, site_dir: Path) -> Path:
         existing["locales"].update(index["locales"])
         index = existing
 
-    index_path.write_text(json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8")
+    index_path.write_text(
+        json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     return index_path
 
 

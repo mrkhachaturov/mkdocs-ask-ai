@@ -13,10 +13,10 @@ from pathlib import Path
 
 try:
     from mcp.server.fastmcp import FastMCP
-except ImportError:
+except ImportError as err:
     raise ImportError(
         "MCP SDK not installed. Install with: pip install mkdocs-ask-ai[mcp]"
-    )
+    ) from err
 
 from .mcp_index import load_index
 
@@ -89,7 +89,9 @@ def create_server(site_dir: Path) -> FastMCP:
             suggestions = [p for p in all_paths if _fuzzy_match(path, p)][:5]
             msg = f"Page not found: {path}"
             if suggestions:
-                msg += "\n\nDid you mean:\n" + "\n".join(f"  - {s}" for s in suggestions)
+                msg += "\n\nDid you mean:\n" + "\n".join(
+                    f"  - {s}" for s in suggestions
+                )
             return msg
 
         return md_file.read_text(encoding="utf-8")
@@ -106,7 +108,10 @@ def create_server(site_dir: Path) -> FastMCP:
         """
         loc = locale or default_locale
         if loc not in index["locales"]:
-            return {"error": f"Locale '{loc}' not found.", "available_locales": available_locales}
+            return {
+                "error": f"Locale '{loc}' not found.",
+                "available_locales": available_locales,
+            }
 
         results = []
         query_lower = query.lower()
@@ -126,13 +131,15 @@ def create_server(site_dir: Path) -> FastMCP:
 
                 snippet = _extract_snippet(content, query_terms)
 
-                results.append({
-                    "title": page["title"],
-                    "path": page["path"],
-                    "section": section_name,
-                    "snippet": snippet,
-                    "score": score,
-                })
+                results.append(
+                    {
+                        "title": page["title"],
+                        "path": page["path"],
+                        "section": section_name,
+                        "snippet": snippet,
+                        "score": score,
+                    }
+                )
 
         results.sort(key=lambda r: r["score"], reverse=True)
 
@@ -164,7 +171,9 @@ def create_server(site_dir: Path) -> FastMCP:
             return full_path.read_text(encoding="utf-8")
 
         if loc not in index["locales"]:
-            return f"Locale '{loc}' not found. Available: {', '.join(available_locales)}"
+            return (
+                f"Locale '{loc}' not found. Available: {', '.join(available_locales)}"
+            )
 
         parts = [f"# {site_name}\n"]
         for section_name, pages in index["locales"][loc]["sections"].items():
@@ -179,12 +188,16 @@ def create_server(site_dir: Path) -> FastMCP:
 
     # Register each page as an MCP resource
     for loc, locale_data in index["locales"].items():
-        for section_name, pages in locale_data["sections"].items():
+        for _section_name, pages in locale_data["sections"].items():
             for page in pages:
                 _path = page["path"]
                 _title = page["title"]
 
-                @mcp.resource(f"docs://{site_name}/{_path}", name=f"{_title} ({loc})", mime_type="text/markdown")
+                @mcp.resource(
+                    f"docs://{site_name}/{_path}",
+                    name=f"{_title} ({loc})",
+                    mime_type="text/markdown",
+                )
                 def _read_page(_bound_path=_path) -> str:
                     md_file = site_dir / _bound_path
                     if md_file.exists():
@@ -220,7 +233,7 @@ def _extract_snippet(content: str, terms: list[str], context_chars: int = 150) -
             earliest_pos = pos
 
     if earliest_pos == len(content):
-        return content[:context_chars * 2] + "..."
+        return content[: context_chars * 2] + "..."
 
     start = max(0, earliest_pos - context_chars)
     end = min(len(content), earliest_pos + context_chars)

@@ -1,5 +1,3 @@
-import json
-from pathlib import Path
 from mkdocs_ask_ai.mcp_index import build_index, load_index, save_index
 
 
@@ -73,7 +71,11 @@ def test_save_index_merges_locales(tmp_path):
         "site_url": "https://example.com",
         "default_locale": "en",
         "locales": {
-            "en": {"sections": {"Docs": [{"title": "Home", "path": "index.md", "description": ""}]}}
+            "en": {
+                "sections": {
+                    "Docs": [{"title": "Home", "path": "index.md", "description": ""}]
+                }
+            }
         },
     }
     index_ru = {
@@ -81,7 +83,13 @@ def test_save_index_merges_locales(tmp_path):
         "site_url": "https://example.com",
         "default_locale": "en",
         "locales": {
-            "ru": {"sections": {"Docs": [{"title": "Главная", "path": "ru/index.md", "description": ""}]}}
+            "ru": {
+                "sections": {
+                    "Docs": [
+                        {"title": "Главная", "path": "ru/index.md", "description": ""}
+                    ]
+                }
+            }
         },
     }
 

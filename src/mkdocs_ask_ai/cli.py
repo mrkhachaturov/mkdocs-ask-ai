@@ -52,7 +52,10 @@ def _run_mcp(args):
     try:
         from .mcp_server import create_server
     except ImportError:
-        print("Error: MCP SDK not installed. Install with: pip install mkdocs-ask-ai[mcp]", file=sys.stderr)
+        print(
+            "Error: MCP SDK not installed. Install with: pip install mkdocs-ask-ai[mcp]",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     if not args.site_dir.exists():

@@ -4,7 +4,7 @@ import fnmatch
 import mimetypes
 import re
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from urllib.parse import urljoin
 
 from mkdocs.config.defaults import MkDocsConfig
@@ -25,15 +25,13 @@ class LlmsTxtPlugin(BasePlugin[AskAiConfig]):
     def __init__(self):
         super().__init__()
         self.mkdocs_config: MkDocsConfig = None
-        self.pages_data: Dict[str, List[Dict[str, Any]]] = {}
-        self.source_files: Dict[str, str] = {}
+        self.pages_data: dict[str, list[dict[str, Any]]] = {}
+        self.source_files: dict[str, str] = {}
 
     def on_config(self, config: MkDocsConfig) -> MkDocsConfig:
         """Store MkDocs configuration and validate settings."""
         if not config.site_url:
-            raise ValueError(
-                "site_url must be set in MkDocs config for ask-ai plugin"
-            )
+            raise ValueError("site_url must be set in MkDocs config for ask-ai plugin")
 
         # Configure MIME type for .md files so they display in browser instead of downloading
         if self.config.enable_markdown_urls:
@@ -184,7 +182,9 @@ class LlmsTxtPlugin(BasePlugin[AskAiConfig]):
             # Try to get default locale from i18n plugin config
             for plugin_name, plugin_inst in config.plugins.items():
                 if "i18n" in plugin_name and hasattr(plugin_inst, "config"):
-                    default_locale = getattr(plugin_inst.config, "default_language", "en")
+                    default_locale = getattr(
+                        plugin_inst.config, "default_language", "en"
+                    )
                     break
 
             index = build_index(

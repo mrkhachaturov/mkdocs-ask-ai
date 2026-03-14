@@ -1,31 +1,40 @@
-.PHONY: help install lint format test serve build clean
+.PHONY: help install install-dev lint format check test serve build clean pre-commit
 
 help:
 	@echo "Available commands:"
-	@echo "  install    - Install the package in development mode"
-	@echo "  lint       - Run ruff linting"
-	@echo "  format     - Format code with ruff"
-	@echo "  test       - Build test documentation and verify outputs"
-	@echo "  serve      - Serve test documentation locally"
-	@echo "  build      - Build test documentation"
-	@echo "  clean      - Clean build artifacts"
+	@echo "  install       - Install the package in development mode"
+	@echo "  install-dev   - Install with dev + mcp dependencies"
+	@echo "  lint          - Run ruff linting with auto-fix"
+	@echo "  format        - Format code with ruff"
+	@echo "  check         - Run all checks (lint + format check + tests)"
+	@echo "  test          - Run pytest"
+	@echo "  pre-commit    - Install pre-commit hooks"
+	@echo "  serve         - Serve test documentation locally"
+	@echo "  build         - Build test documentation"
+	@echo "  clean         - Clean build artifacts"
 
 install:
-	uv pip install -e .
+	pip install -e .
+
+install-dev:
+	pip install -e ".[dev,mcp]"
+	pre-commit install
 
 lint:
-	ruff check --fix
+	ruff check --fix src/ tests/
 
 format:
-	ruff format
+	ruff format src/ tests/
 
-test: build
-	@echo "Building test documentation..."
-	cd test-site && mkdocs build
-	@echo "Verifying generated files..."
-	@test -f test-site/site/llms.txt || (echo "ERROR: llms.txt not found" && exit 1)
-	@test -f test-site/site/llms-full.txt || (echo "ERROR: llms-full.txt not found" && exit 1)
-	@echo "Test documentation built successfully!"
+check: lint
+	ruff format --check src/ tests/
+	pytest tests/ -v
+
+test:
+	pytest tests/ -v
+
+pre-commit:
+	pre-commit install
 
 serve:
 	cd test-site && mkdocs serve
@@ -34,7 +43,4 @@ build:
 	cd test-site && mkdocs build
 
 clean:
-	rm -rf test-site/site/
-	rm -rf build/
-	rm -rf dist/
-	rm -rf *.egg-info/
+	rm -rf test-site/site/ build/ dist/ src/*.egg-info .pytest_cache
