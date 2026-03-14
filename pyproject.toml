@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mkdocs-ask-ai"
-version = "1.1.0"
+version = "1.1.1"
 description = "MkDocs plugin for LLM-friendly documentation with direct markdown serving and i18n support"
 authors = [{ name = "Ruben Khachaturov", email = "mr.kha4a2rov@protonmail.com" }]
 license = "MIT"
