@@ -13,15 +13,19 @@ from pathlib import Path
 
 try:
     from mcp.server.fastmcp import FastMCP
-except ImportError as err:
-    raise ImportError(
-        "MCP SDK not installed. Install with: pip install mkdocs-ask-ai[mcp]"
-    ) from err
+
+    _HAS_MCP = True
+except ImportError:
+    _HAS_MCP = False
 
 from .mcp_index import load_index
 
 
 def create_server(site_dir: Path) -> FastMCP:
+    if not _HAS_MCP:
+        raise ImportError(
+            "MCP SDK not installed. Install with: pip install mkdocs-ask-ai[mcp]"
+        )
     """Create and configure the MCP server for a built site."""
     site_dir = Path(site_dir)
     index = load_index(site_dir)
