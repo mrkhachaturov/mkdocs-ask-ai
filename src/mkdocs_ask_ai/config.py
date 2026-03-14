@@ -41,3 +41,16 @@ class AskAiConfig(Config):
         dict, default={"top": "80px", "right": "20px", "z_index": "1100"}
     )
     copy_button_style = config_options.Type(dict, default={})
+
+    # MCP server options
+    enable_mcp = config_options.Type(bool, default=False)
+    """Whether to generate docs-index.json for MCP server."""
+
+    mcp_transport = config_options.Type(str, default="stdio")
+    """MCP transport: 'stdio' or 'streamable-http'."""
+
+    mcp_path = config_options.Type(str, default="/mcp")
+    """URL path for streamable HTTP transport."""
+
+    mcp_port = config_options.Type(int, default=8808)
+    """Port for standalone streamable HTTP server."""

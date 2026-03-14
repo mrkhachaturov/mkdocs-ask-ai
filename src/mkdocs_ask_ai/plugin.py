@@ -13,6 +13,7 @@ from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
 
 from .config import AskAiConfig
+from .mcp_index import build_index, save_index
 
 # Pattern to match i18n locale suffixed files (e.g. page.ru.md, page.de.md)
 _I18N_SUFFIX_RE = re.compile(r"\.[a-z]{2,3}\.md$")
@@ -175,6 +176,25 @@ class LlmsTxtPlugin(BasePlugin[AskAiConfig]):
         # Generate llms-full.txt
         if self.config.enable_llms_full:
             self._generate_llms_full_txt(output_dir, config)
+
+        # Generate docs-index.json for MCP server
+        if self.config.enable_mcp:
+            locale_prefix = self._detect_locale_prefix()
+            default_locale = "en"
+            # Try to get default locale from i18n plugin config
+            for plugin_name, plugin_inst in config.plugins.items():
+                if "i18n" in plugin_name and hasattr(plugin_inst, "config"):
+                    default_locale = getattr(plugin_inst.config, "default_language", "en")
+                    break
+
+            index = build_index(
+                pages_data=self.pages_data,
+                site_name=config.site_name,
+                site_url=config.site_url or "",
+                default_locale=default_locale,
+                locale_prefix=locale_prefix,
+            )
+            save_index(index, site_dir)
 
     def _generate_markdown_files(self, site_dir: Path) -> None:
         """Generate individual .md files for each page."""
