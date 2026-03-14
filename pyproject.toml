@@ -26,6 +26,9 @@ classifiers = [
 ]
 dependencies = ["mkdocs>=1.4.0"]
 
+[project.optional-dependencies]
+mcp = ["mcp>=1.0.0"]
+
 [project.urls]
 "Homepage" = "https://github.com/mrkhachaturov/mkdocs-ask-ai"
 "Bug Reports" = "https://github.com/mrkhachaturov/mkdocs-ask-ai/issues"
@@ -33,6 +36,9 @@ dependencies = ["mkdocs>=1.4.0"]
 
 [project.entry-points."mkdocs.plugins"]
 ask-ai = "mkdocs_ask_ai.plugin:LlmsTxtPlugin"
+
+[project.scripts]
+mkdocs-ask-ai = "mkdocs_ask_ai.cli:main"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
