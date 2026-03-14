@@ -13,7 +13,7 @@ Make your MkDocs documentation AI-ready. One plugin gives your site everything A
 
 Works with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and [mkdocs-static-i18n](https://github.com/ultrabug/mkdocs-static-i18n) out of the box.
 
-![mkdocs-ask-ai — "Use with AI" dropdown on a documentation page](assets/banner.png)
+![mkdocs-ask-ai — "Use with AI" dropdown on a documentation page](assets/demo.gif)
 
 ---
 
@@ -76,6 +76,18 @@ Full support for multilingual sites via `mkdocs-static-i18n`. Each locale gets i
 - Markdown files at locale-prefixed URLs
 - MCP server tools with `locale` parameter
 - `docs-index.json` with all locales merged
+
+### Comparison
+
+| Feature | mkdocs-ask-ai | mkdocs-llmstxt | mkdocs-mcp |
+|---------|:---:|:---:|:---:|
+| "Use with AI" menu | :white_check_mark: | :x: | :x: |
+| llms.txt / llms-full.txt | :white_check_mark: | :white_check_mark: | :x: |
+| MCP server | :white_check_mark: | :x: | :white_check_mark: |
+| Raw .md URLs | :white_check_mark: | :x: | :x: |
+| i18n support | :white_check_mark: | :x: | :x: |
+| Open in ChatGPT / Claude | :white_check_mark: | :x: | :x: |
+| One plugin for everything | :white_check_mark: | :x: | :x: |
 
 ---
 
@@ -218,7 +230,7 @@ Options:
 |------------|-------------|
 | `mkdocs serve` | Automatic — MCP starts alongside dev server |
 | Self-hosted (Docker/VM) | Run `mkdocs-ask-ai mcp` as a sidecar service |
-| Static hosting (GitLab Pages, Netlify, GitHub Pages) | Not supported — MCP requires a running process |
+| Static hosting (GitHub Pages, GitLab Pages, Netlify) | Not supported — MCP requires a running process |
 
 For static hosting, the llms.txt, markdown URLs, and "Use with AI" dropdown
 work out of the box. Only the MCP server requires a running process.
