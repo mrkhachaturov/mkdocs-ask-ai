@@ -23,9 +23,9 @@ def main():
     )
     mcp_parser.add_argument(
         "--transport",
-        choices=["stdio", "http"],
+        choices=["stdio", "http", "sse"],
         default="stdio",
-        help="MCP transport (default: stdio)",
+        help="MCP transport: stdio, http (streamable), or sse (default: stdio)",
     )
     mcp_parser.add_argument(
         "--port",
@@ -67,8 +67,14 @@ def _run_mcp(args):
 
     if args.transport == "stdio":
         server.run(transport="stdio")
+    elif args.transport == "sse":
+        server.settings.host = args.host
+        server.settings.port = args.port
+        server.run(transport="sse")
     else:
-        server.run(transport="streamable-http", host=args.host, port=args.port)
+        server.settings.host = args.host
+        server.settings.port = args.port
+        server.run(transport="streamable-http")
 
 
 if __name__ == "__main__":

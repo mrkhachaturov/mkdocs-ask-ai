@@ -64,7 +64,7 @@ Expose your documentation as an [MCP](https://modelcontextprotocol.io/) server s
 | Use case | Transport | Example |
 |----------|-----------|---------|
 | Local / private | stdio | Add to Claude Desktop, Cursor, Windsurf |
-| Public website | Streamable HTTP | `https://your-site.com/mcp` |
+| Public website | SSE or Streamable HTTP | `https://your-site.com/mcp` |
 
 Every page is also registered as an MCP resource (`docs://site-name/path/to/page.md`).
 
@@ -135,11 +135,13 @@ plugins:
 ```yaml
 plugins:
   - ask-ai:
-      enable_mcp: true                  # Generate docs-index.json for MCP
-      mcp_transport: "stdio"            # "stdio" or "streamable-http"
+      enable_mcp: true                  # Enable MCP server + docs-index.json
       mcp_path: "/mcp"                  # URL path for streamable HTTP
-      mcp_port: 8808                    # Port for standalone HTTP server
+      mcp_port: 8808                    # Port for MCP HTTP server
 ```
+
+When `enable_mcp` is set and you run `mkdocs serve`, the MCP server starts
+automatically alongside the dev server at `http://127.0.0.1:8808/mcp`.
 
 ### Section Patterns
 
@@ -157,20 +159,40 @@ sections:
 
 ## Using the MCP Server
 
-### With Claude Desktop / Cursor
+### With `mkdocs serve` (recommended for development)
 
-Build your site first, then add to your MCP config:
+When `enable_mcp: true` is set, running `mkdocs serve` automatically starts
+the MCP server on port 8808. Add this to your `.mcp.json` or Claude Desktop config:
+
+```json
+{
+  "mcpServers": {
+    "my-docs": {
+      "type": "sse",
+      "url": "http://127.0.0.1:8808/sse"
+    }
+  }
+}
+```
+
+### With Claude Desktop / Cursor (stdio)
+
+For stdio transport, build your site first and point to the output directory.
+Requires `mkdocs-ask-ai` to be installed in the environment (`pip install mkdocs-ask-ai[mcp]`):
 
 ```json
 {
   "mcpServers": {
     "my-docs": {
       "command": "mkdocs-ask-ai",
-      "args": ["mcp", "--site-dir", "/path/to/public"]
+      "args": ["mcp", "--site-dir", "./public"]
     }
   }
 }
 ```
+
+> If `mkdocs-ask-ai` is installed in a virtualenv, use the full path to the
+> binary (e.g. `/path/to/.venv/bin/mkdocs-ask-ai`).
 
 ### Standalone HTTP Server
 
@@ -184,11 +206,22 @@ mkdocs-ask-ai mcp --transport http --port 8808 --site-dir ./public
 mkdocs-ask-ai mcp [OPTIONS]
 
 Options:
-  --site-dir PATH          Built site directory (default: ./public)
-  --transport {stdio,http} Transport type (default: stdio)
-  --port PORT              HTTP port (default: 8808)
-  --host HOST              HTTP host (default: 127.0.0.1)
+  --site-dir PATH              Built site directory (default: ./public)
+  --transport {stdio,http,sse} Transport type (default: stdio)
+  --port PORT                  HTTP/SSE port (default: 8808)
+  --host HOST                  HTTP/SSE host (default: 127.0.0.1)
 ```
+
+### Hosting Considerations
+
+| Deployment | MCP support |
+|------------|-------------|
+| `mkdocs serve` | Automatic — MCP starts alongside dev server |
+| Self-hosted (Docker/VM) | Run `mkdocs-ask-ai mcp` as a sidecar service |
+| Static hosting (GitLab Pages, Netlify, GitHub Pages) | Not supported — MCP requires a running process |
+
+For static hosting, the llms.txt, markdown URLs, and "Use with AI" dropdown
+work out of the box. Only the MCP server requires a running process.
 
 ## With mkdocs-static-i18n
 
@@ -225,3 +258,5 @@ public/
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+Originally inspired by [mkdocs-llmstxt-md](https://github.com/noklam/mkdocs-llmstxt-md) by Nok Lam Chan.

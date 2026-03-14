@@ -1,8 +1,10 @@
 """Main plugin class for the Ask AI MkDocs plugin."""
 
 import fnmatch
+import logging
 import mimetypes
 import re
+import threading
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin
@@ -14,6 +16,8 @@ from mkdocs.structure.pages import Page
 
 from .config import AskAiConfig
 from .mcp_index import build_index, save_index
+
+log = logging.getLogger("mkdocs.plugins.ask-ai")
 
 # Pattern to match i18n locale suffixed files (e.g. page.ru.md, page.de.md)
 _I18N_SUFFIX_RE = re.compile(r"\.[a-z]{2,3}\.md$")
@@ -27,6 +31,12 @@ class LlmsTxtPlugin(BasePlugin[AskAiConfig]):
         self.mkdocs_config: MkDocsConfig = None
         self.pages_data: dict[str, list[dict[str, Any]]] = {}
         self.source_files: dict[str, str] = {}
+        self._mcp_thread: threading.Thread | None = None
+        self._is_serving: bool = False
+
+    def on_startup(self, *, command, dirty) -> None:
+        """Track whether we're in serve mode."""
+        self._is_serving = command == "serve"
 
     def on_config(self, config: MkDocsConfig) -> MkDocsConfig:
         """Store MkDocs configuration and validate settings."""
@@ -195,6 +205,47 @@ class LlmsTxtPlugin(BasePlugin[AskAiConfig]):
                 locale_prefix=locale_prefix,
             )
             save_index(index, site_dir)
+
+        # Start MCP server alongside mkdocs serve
+        if self.config.enable_mcp and self._is_serving:
+            self._start_mcp_server(site_dir)
+
+    def _start_mcp_server(self, site_dir: Path) -> None:
+        """Start MCP HTTP server in a background thread."""
+        # Only start once
+        if self._mcp_thread is not None and self._mcp_thread.is_alive():
+            return
+
+        try:
+            from .mcp_server import create_server
+        except ImportError:
+            log.warning(
+                "MCP SDK not installed — MCP server disabled. "
+                "Install with: pip install mkdocs-ask-ai[mcp]"
+            )
+            return
+
+        if not (site_dir / "docs-index.json").exists():
+            return
+
+        mcp_port = self.config.mcp_port
+        mcp_path = self.config.mcp_path
+
+        def _run_mcp():
+            try:
+                mcp = create_server(site_dir)
+                mcp.settings.streamable_http_path = mcp_path
+                mcp.settings.host = "127.0.0.1"
+                mcp.settings.port = mcp_port
+                mcp.run(transport="streamable-http")
+            except Exception:
+                log.exception("MCP server failed to start")
+
+        self._mcp_thread = threading.Thread(
+            target=_run_mcp, daemon=True, name="mcp-server"
+        )
+        self._mcp_thread.start()
+        log.info("MCP server started at http://127.0.0.1:%s%s", mcp_port, mcp_path)
 
     def _generate_markdown_files(self, site_dir: Path) -> None:
         """Generate individual .md files for each page."""

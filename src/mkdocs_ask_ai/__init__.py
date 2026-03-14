@@ -1,6 +1,6 @@
 """MkDocs plugin for LLM-friendly documentation."""
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 from .plugin import LlmsTxtPlugin
 

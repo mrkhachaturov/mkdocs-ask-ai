@@ -33,6 +33,9 @@ def create_server(site_dir: Path) -> FastMCP:
     default_locale = index["default_locale"]
     available_locales = list(index["locales"].keys())
 
+    # Slugify site name for use in URIs
+    site_slug = re.sub(r"[^a-zA-Z0-9-]", "-", site_name).strip("-").lower()
+
     mcp = FastMCP(
         name=f"{site_name} Docs",
         instructions=(
@@ -191,22 +194,25 @@ def create_server(site_dir: Path) -> FastMCP:
         return "\n".join(parts)
 
     # Register each page as an MCP resource
+    def _make_reader(path: str):
+        """Create a closure that reads a specific page."""
+
+        def reader() -> str:
+            md_file = site_dir / path
+            if md_file.exists():
+                return md_file.read_text(encoding="utf-8")
+            return f"Page not found: {path}"
+
+        return reader
+
     for loc, locale_data in index["locales"].items():
         for _section_name, pages in locale_data["sections"].items():
             for page in pages:
-                _path = page["path"]
-                _title = page["title"]
-
-                @mcp.resource(
-                    f"docs://{site_name}/{_path}",
-                    name=f"{_title} ({loc})",
+                mcp.resource(
+                    f"docs://{site_slug}/{page['path']}",
+                    name=f"{page['title']} ({loc})",
                     mime_type="text/markdown",
-                )
-                def _read_page(_bound_path=_path) -> str:
-                    md_file = site_dir / _bound_path
-                    if md_file.exists():
-                        return md_file.read_text(encoding="utf-8")
-                    return f"Page not found: {_bound_path}"
+                )(_make_reader(page["path"]))
 
     return mcp
 
