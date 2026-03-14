@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport re, sys\ntry:\n    v1 = re.search(r'version = \\\"([^\\\"]+)\\\"', open('pyproject.toml').read())\n    v2 = re.search(r'__version__ = \\\"([^\\\"]+)\\\"', open('src/mkdocs_ask_ai/__init__.py').read())\n    if v1 and v2 and v1.group(1) != v2.group(1):\n        print(f'VERSION MISMATCH: pyproject.toml={v1.group(1)}, __init__.py={v2.group(1)} — update both files', file=sys.stderr)\n        sys.exit(2)\nexcept FileNotFoundError:\n    pass\n\""
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"${CLAUDE_TOOL_INPUT_FILE_PATH:-}\"; if [[ \"$FILE\" == *.py ]]; then ruff check \"$FILE\" 2>&1 && ruff format --check \"$FILE\" 2>&1 || exit 2; fi'"
+          }
+        ]
+      }
+    ]
+  }
+}
