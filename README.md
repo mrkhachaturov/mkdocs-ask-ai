@@ -17,28 +17,28 @@ https://github.com/user-attachments/assets/b6a26956-c54c-4fcb-9d59-e58626a37786
 
 ---
 
-## Features
+## ✨ Features
 
-### "Use with AI" Dropdown
+### 🤖 "Use with AI" Dropdown
 
 A floating button on every page with:
 
 - **Copy page as Markdown** — one-click clipboard copy for any AI tool
 - **View as Markdown** — opens the clean `.md` source in a new tab
-- **Open in ChatGPT** — sends page content directly to ChatGPT via `?q=` parameter
-- **Open in Claude** — sends page content directly to Claude via `?q=` parameter
+- **Open in ChatGPT / Open in Claude**
+  > Fetches the full page markdown and sends it directly into the chat — not a link. The AI gets the content immediately, no crawling required, works on private or uncrawlable sites. Pages over 7,500 characters are truncated with a link back to the full `.md` source so the AI can retrieve the rest.
 - **llms.txt** — link to the full documentation index
 
 Adapts to light and dark themes automatically. Inspired by [1Password's developer docs](https://developer.1password.com).
 
-### llms.txt + llms-full.txt
+### 📄 llms.txt + llms-full.txt
 
 Follows the [llms.txt standard](https://llmstxt.org/) to make your documentation discoverable by AI systems:
 
 - **`llms.txt`** — structured index with sections, titles, and links to markdown sources
 - **`llms-full.txt`** — complete documentation in a single file for full-context queries
 
-### Direct Markdown Serving
+### 🔗 Direct Markdown Serving
 
 Every page is accessible as clean markdown at its `.md` URL. No HTML parsing needed — AI tools get exactly what they need.
 
@@ -46,11 +46,9 @@ Every page is accessible as clean markdown at its `.md` URL. No HTML parsing nee
 https://your-site.com/getting-started/index.md
 ```
 
-### MCP Server
+### ⚡ MCP Server
 
 Expose your documentation as an [MCP](https://modelcontextprotocol.io/) server so AI agents can query it programmatically.
-
-**Tools:**
 
 | Tool | Description |
 |------|-------------|
@@ -59,39 +57,20 @@ Expose your documentation as an [MCP](https://modelcontextprotocol.io/) server s
 | `search_docs(query, locale?)` | Full-text search with snippets |
 | `get_full_docs(locale?)` | Get the entire documentation as one text |
 
-**Transports:**
-
-| Use case | Transport | Example |
-|----------|-----------|---------|
-| Local / private | stdio | Add to Claude Desktop, Cursor, Windsurf |
-| Public website | SSE or Streamable HTTP | `https://your-site.com/mcp` |
+| Transport | Use case |
+|-----------|----------|
+| `stdio` | Local tools — Claude Desktop, Cursor, Windsurf |
+| `sse` / `http` | Public websites — `https://your-site.com/mcp` |
 
 Every page is also registered as an MCP resource (`docs://site-name/path/to/page.md`).
 
-### i18n Support
+### 🌍 i18n Support
 
-Full support for multilingual sites via `mkdocs-static-i18n`. Each locale gets its own:
-
-- `llms.txt` and `llms-full.txt`
-- Markdown files at locale-prefixed URLs
-- MCP server tools with `locale` parameter
-- `docs-index.json` with all locales merged
-
-### Comparison
-
-| Feature | mkdocs-ask-ai | mkdocs-llmstxt | mkdocs-mcp |
-|---------|:---:|:---:|:---:|
-| "Use with AI" menu | :white_check_mark: | :x: | :x: |
-| llms.txt / llms-full.txt | :white_check_mark: | :white_check_mark: | :x: |
-| MCP server | :white_check_mark: | :x: | :white_check_mark: |
-| Raw .md URLs | :white_check_mark: | :x: | :x: |
-| i18n support | :white_check_mark: | :x: | :x: |
-| Open in ChatGPT / Claude | :white_check_mark: | :x: | :x: |
-| One plugin for everything | :white_check_mark: | :x: | :x: |
+Full support for multilingual sites via `mkdocs-static-i18n`. Each locale gets its own `llms.txt`, `llms-full.txt`, markdown URLs, and MCP tools with a `locale` parameter.
 
 ---
 
-## Installation
+## 🚀 Installation & Quick Start
 
 ```bash
 pip install mkdocs-ask-ai
@@ -102,8 +81,6 @@ With MCP server support:
 ```bash
 pip install mkdocs-ask-ai[mcp]
 ```
-
-## Quick Start
 
 Add to your `mkdocs.yml`:
 
@@ -118,13 +95,11 @@ plugins:
           - api/*.md
 ```
 
-That's it. Your site now has:
+Your site now has a **"Use with AI"** dropdown on every page, `llms.txt` and `llms-full.txt` at the root, and a `.md` URL for every page.
 
-- `llms.txt` and `llms-full.txt` at the site root
-- `.md` URLs for every page
-- "Use with AI" dropdown on every page
+---
 
-## Configuration
+## ⚙️ Configuration
 
 ### Basic Options
 
@@ -142,7 +117,7 @@ plugins:
       enable_llms_full: true            # Generate llms-full.txt
 ```
 
-### MCP Server Options
+### MCP Options
 
 ```yaml
 plugins:
@@ -151,9 +126,6 @@ plugins:
       mcp_path: "/mcp"                  # URL path for streamable HTTP
       mcp_port: 8808                    # Port for MCP HTTP server
 ```
-
-When `enable_mcp` is set and you run `mkdocs serve`, the MCP server starts
-automatically alongside the dev server at `http://127.0.0.1:8808/mcp`.
 
 ### Section Patterns
 
@@ -169,12 +141,13 @@ sections:
     - api/*.md
 ```
 
-## Using the MCP Server
+---
 
-### With `mkdocs serve` (recommended for development)
+## 🔌 MCP Server Setup
 
-When `enable_mcp: true` is set, running `mkdocs serve` automatically starts
-the MCP server on port 8808. Add this to your `.mcp.json` or Claude Desktop config:
+### With `mkdocs serve` (development)
+
+When `enable_mcp: true` is set, the MCP server starts automatically alongside the dev server at `http://127.0.0.1:8808/mcp`. Add to your `.mcp.json` or Claude Desktop config:
 
 ```json
 {
@@ -189,8 +162,7 @@ the MCP server on port 8808. Add this to your `.mcp.json` or Claude Desktop conf
 
 ### With Claude Desktop / Cursor (stdio)
 
-For stdio transport, build your site first and point to the output directory.
-Requires `mkdocs-ask-ai` to be installed in the environment (`pip install mkdocs-ask-ai[mcp]`):
+Build your site first, then point to the output directory:
 
 ```json
 {
@@ -203,8 +175,7 @@ Requires `mkdocs-ask-ai` to be installed in the environment (`pip install mkdocs
 }
 ```
 
-> If `mkdocs-ask-ai` is installed in a virtualenv, use the full path to the
-> binary (e.g. `/path/to/.venv/bin/mkdocs-ask-ai`).
+> If `mkdocs-ask-ai` is installed in a virtualenv, use the full path to the binary (e.g. `/path/to/.venv/bin/mkdocs-ask-ai`).
 
 ### Standalone HTTP Server
 
@@ -224,18 +195,17 @@ Options:
   --host HOST                  HTTP/SSE host (default: 127.0.0.1)
 ```
 
-### Hosting Considerations
+### Hosting
 
 | Deployment | MCP support |
 |------------|-------------|
-| `mkdocs serve` | Automatic — MCP starts alongside dev server |
+| `mkdocs serve` | Automatic — starts alongside dev server |
 | Self-hosted (Docker/VM) | Run `mkdocs-ask-ai mcp` as a sidecar service |
-| Static hosting (GitHub Pages, GitLab Pages, Netlify) | Not supported — MCP requires a running process |
+| Static hosting (GitHub Pages, GitLab Pages, Netlify) | Not supported — requires a running process |
 
-For static hosting, the llms.txt, markdown URLs, and "Use with AI" dropdown
-work out of the box. Only the MCP server requires a running process.
+> For static hosting, the "Use with AI" dropdown, `llms.txt`, and `.md` URLs all work out of the box. Only the MCP server requires a running process.
 
-## With mkdocs-static-i18n
+### With mkdocs-static-i18n
 
 Place `ask-ai` **before** `i18n` in the plugins list:
 
@@ -266,6 +236,8 @@ public/
     llms.txt            # Russian
     llms-full.txt
 ```
+
+---
 
 ## License
 
