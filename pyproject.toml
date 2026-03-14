@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mkdocs-ask-ai"
+version = "1.0.0"
+description = "MkDocs plugin for LLM-friendly documentation with direct markdown serving and i18n support"
+authors = [{ name = "Ruben Khachaturov", email = "mr.kha4a2rov@protonmail.com" }]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["mkdocs", "plugin", "llm", "documentation", "markdown", "ai", "llms-txt", "i18n"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Documentation",
+    "Topic :: Software Development :: Documentation",
+]
+dependencies = ["mkdocs>=1.4.0"]
+
+[project.urls]
+"Homepage" = "https://github.com/mrkhachaturov/mkdocs-ask-ai"
+"Bug Reports" = "https://github.com/mrkhachaturov/mkdocs-ask-ai/issues"
+"Source" = "https://github.com/mrkhachaturov/mkdocs-ask-ai"
+
+[project.entry-points."mkdocs.plugins"]
+ask-ai = "mkdocs_ask_ai.plugin:LlmsTxtPlugin"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+mkdocs_ask_ai = ["templates/*", "static/*"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+extend-exclude = ["test-site/", "build/", "dist/"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line too long, handled by formatter
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["mkdocs_ask_ai"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
