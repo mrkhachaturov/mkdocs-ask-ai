@@ -13,7 +13,7 @@ Make your MkDocs documentation AI-ready. One plugin gives your site everything A
 
 Works with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and [mkdocs-static-i18n](https://github.com/ultrabug/mkdocs-static-i18n) out of the box.
 
-![mkdocs-ask-ai — "Use with AI" dropdown on a documentation page](assets/demo.gif)
+https://github.com/mrkhachaturov/mkdocs-ask-ai/raw/main/assets/demo.mp4
 
 ---
 
